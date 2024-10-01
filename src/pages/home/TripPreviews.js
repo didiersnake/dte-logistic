@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import F1 from "../../images/f2.webp"
-import { readAllData } from '../../functions/crud'
+import { createData, readAllData } from "../../functions/crud";
 import {
   geocodeByAddress,
 } from "react-places-autocomplete";
@@ -9,6 +9,7 @@ import moment from 'moment';
 import Modal from '../../components/Modal';
 import emailjs from "@emailjs/browser"
 import { useNavigate } from 'react-router-dom';
+import { globalConstants } from "../../constants/global";
 
 export const TripPreviews = ({allData, user}) => {
 
@@ -24,35 +25,49 @@ export const TripPreviews = ({allData, user}) => {
   const navigate = useNavigate()
 
   const handleContactCarrier = async (from, recipient, recipient_name, data) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    } else {
+      const serviceId = "service_sigld6q";
+      const templateId = "template_a4yd3od";
 
-    if(!user){
-      navigate("/login")
-      return
+      try {
+        await emailjs.send(serviceId, templateId, {
+          name: from,
+          recipient: recipient,
+          recipient_name: recipient_name,
+          data_name: data.name,
+          data_email: data.email,
+          data_phone: data.phone,
+          data_departure: data.departure,
+          data_destination: data.destination,
+          data_departureDate: data.departureDate,
+          data_arrival: data.arrival,
+          data_price: "$" + data.price + "/KG",
+        });
+        // alert("email successfully sent check inbox");
+        openModal();
+      } catch (error) {
+        console.log(error);
+      }
+
+      let _data = {
+        departure: data.departure,
+        destination: data.destination,
+        departureDate: data.departureDate,
+        createdAt: globalConstants.createdAt,
+        arrival: data.arrival,
+        price: "$" + data.price + "/KG",
+        traveler_phone: data.phone,
+        traveler_name: data.name,
+        traveler_email: data.email,
+        client_name: user.firstName + user.lastName,
+        client_email: user.email,
+        client_phone: user.phone,
+      };
+      createData("bookings", _data);
     }
-    
-    const serviceId = "service_sigld6q";
-    const templateId = "template_a4yd3od";
-
-    try {
-      await emailjs.send(serviceId, templateId, {
-        "name": from,
-        "recipient": recipient,
-        "recipient_name": recipient_name,
-        "data_name": data.name,
-        "data_email": data.email,
-        "data_phone": data.phone,
-        "data_departure": data.departure,
-        "data_destination" : data.destination,
-        "data_departureDate": data.departureDate,
-        "data_arrival": data.arrival,
-        "data_price" : "$" + data.price + "/KG"
-      });
-      // alert("email successfully sent check inbox");
-      openModal()
-    } catch (error) {
-      console.log(error);
-    }
-
   }
 
   useEffect(() => emailjs.init("LvnnvzP61DZzX_aNi"), [])

@@ -9,9 +9,13 @@ import { Footer } from "../components/Footer";
 import { Profile } from "../pages/Profile";
 import { ReadMyFlights } from "../pages/Traveler/ReadMyFlights";
 import { Carriers } from "../pages/carriers/Carriers";
+import { globalConstants } from "../constants/global";
+import { FloatingButton } from "../components/FloatingButton";
+import { Bookings } from "../pages/Bookings";
 
-export default function UserRoutes({isLoggedOut, user}) {
-    
+export default function UserRoutes({ isLoggedOut, user }) {
+  let isTraveler = user?.role === globalConstants.userRole[2];
+
   return (
     <div>
       <NavBar>
@@ -20,13 +24,14 @@ export default function UserRoutes({isLoggedOut, user}) {
             path="/"
             element={<Home isLoggedOut={isLoggedOut} user={user} />}
           />
-          <Route path="/orders" element={<div>Ordes</div>} />
-          <Route path="/carriers" element={<Carriers userEmail={user} />} />
+
+          <Route path="/orders" element={<Bookings user={user} />} />
+          <Route path="/carriers" element={<Carriers user={user} />} />
           <Route
             path="/my-flights"
             element={
               <div>
-               <ReadMyFlights user={user} />
+                <ReadMyFlights user={user} />
               </div>
             }
           />
@@ -51,6 +56,7 @@ export default function UserRoutes({isLoggedOut, user}) {
           <Route path="/*" element={<ErrorPage />} />
         </Routes>
       </NavBar>
+      <FloatingButton isTravler={isTraveler} />
       <Footer isLoggedOut={isLoggedOut} user={user} />
     </div>
   );
